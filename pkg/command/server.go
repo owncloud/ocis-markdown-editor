@@ -134,7 +134,7 @@ func Server(cfg *config.Config) *cli.Command {
 			defer cancel()
 
 			{
-				server, err := http.Server(
+				server := http.Server(
 					http.Logger(logger),
 					http.Context(ctx),
 					http.Config(cfg),
@@ -142,15 +142,6 @@ func Server(cfg *config.Config) *cli.Command {
 					http.Flags(flagset.RootWithConfig(cfg)),
 					http.Flags(flagset.ServerWithConfig(cfg)),
 				)
-
-				if err != nil {
-					logger.Info().
-						Err(err).
-						Str("transport", "http").
-						Msg("Failed to initialize server")
-
-					return err
-				}
 
 				gr.Add(func() error {
 					return server.Run()

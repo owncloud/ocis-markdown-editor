@@ -10,7 +10,7 @@ import (
 )
 
 // Server initializes the http service and server.
-func Server(opts ...Option) (http.Service, error) {
+func Server(opts ...Option) http.Service {
 	options := newOptions(opts...)
 
 	service := http.NewService(
@@ -61,6 +61,8 @@ func Server(opts ...Option) (http.Service, error) {
 		mux,
 	)
 
-	service.Init()
-	return service, nil
+	if err := service.Init(); err != nil {
+		panic(err)
+	}
+	return service
 }
