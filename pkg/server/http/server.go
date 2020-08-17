@@ -15,8 +15,8 @@ func Server(opts ...Option) http.Service {
 
 	service := http.NewService(
 		http.Logger(options.Logger),
-		http.Namespace(options.Namespace),
-		http.Name("markdown-editor"),
+		http.Name(options.Name),
+		http.Namespace(options.Config.HTTP.Namespace),
 		http.Version(version.String),
 		http.Address(options.Config.HTTP.Addr),
 		http.Context(options.Context),
@@ -40,7 +40,7 @@ func Server(opts ...Option) http.Service {
 	mux.Use(middleware.Secure)
 
 	mux.Use(middleware.Version(
-		"markdown-editor",
+		options.Name,
 		version.String,
 	))
 

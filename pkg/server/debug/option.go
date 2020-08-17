@@ -15,6 +15,7 @@ type Options struct {
 	Logger  log.Logger
 	Context context.Context
 	Config  *config.Config
+	Name    string
 }
 
 // newOptions initializes the available default options.
@@ -46,5 +47,12 @@ func Context(val context.Context) Option {
 func Config(val *config.Config) Option {
 	return func(o *Options) {
 		o.Config = val
+	}
+}
+
+// Name provides a function to set the Name option.
+func Name(val string) Option {
+	return func(o *Options) {
+		o.Name = val
 	}
 }

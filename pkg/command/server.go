@@ -136,6 +136,7 @@ func Server(cfg *config.Config) *cli.Command {
 			{
 				server := http.Server(
 					http.Logger(logger),
+					http.Name("markdown-editor"),
 					http.Context(ctx),
 					http.Config(cfg),
 					http.Metrics(metrics),
@@ -157,6 +158,7 @@ func Server(cfg *config.Config) *cli.Command {
 			{
 				server, err := debug.Server(
 					debug.Logger(logger),
+					debug.Name("markdown-editor"),
 					debug.Context(ctx),
 					debug.Config(cfg),
 				)
