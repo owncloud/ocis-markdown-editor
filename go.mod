@@ -6,6 +6,7 @@ require (
 	contrib.go.opencensus.io/exporter/jaeger v0.2.1
 	contrib.go.opencensus.io/exporter/ocagent v0.6.0
 	contrib.go.opencensus.io/exporter/zipkin v0.1.1
+	github.com/UnnoTed/fileb0x v1.1.4 // indirect
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/micro/cli/v2 v2.1.2
 	github.com/oklog/run v1.0.0

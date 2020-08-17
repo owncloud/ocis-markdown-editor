@@ -13,14 +13,11 @@ type Service interface {
 }
 
 // NewService returns a service implementation for Service.
-func NewService(opts ...Option) Service {
-	options := newOptions(opts...)
-
+func NewService(cfg *config.Config) Service {
 	m := chi.NewMux()
-	m.Use(options.Middleware...)
 
 	svc := MarkdownEditor{
-		config: options.Config,
+		config: cfg,
 		mux:    m,
 	}
 
@@ -31,6 +28,10 @@ func NewService(opts ...Option) Service {
 type MarkdownEditor struct {
 	config *config.Config
 	mux    *chi.Mux
+}
+
+// AddMiddleware adds a middleware to the service
+func (g MarkdownEditor) AddMiddleware() {
 }
 
 // ServeHTTP implements the Service interface.

@@ -10,14 +10,13 @@ import (
 	"contrib.go.opencensus.io/exporter/jaeger"
 	"contrib.go.opencensus.io/exporter/ocagent"
 	"contrib.go.opencensus.io/exporter/zipkin"
-	"github.com/micro/cli/v2"
+	cli "github.com/micro/cli/v2"
 	"github.com/oklog/run"
 	openzipkin "github.com/openzipkin/zipkin-go"
 	zipkinhttp "github.com/openzipkin/zipkin-go/reporter/http"
 	"github.com/owncloud/ocis-markdown-editor/pkg/config"
 	"github.com/owncloud/ocis-markdown-editor/pkg/flagset"
 	"github.com/owncloud/ocis-markdown-editor/pkg/metrics"
-	"github.com/owncloud/ocis-markdown-editor/pkg/server/debug"
 	"github.com/owncloud/ocis-markdown-editor/pkg/server/http"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
@@ -140,8 +139,8 @@ func Server(cfg *config.Config) *cli.Command {
 					http.Context(ctx),
 					http.Config(cfg),
 					http.Metrics(metrics),
-					http.Flags(flagset.RootWithConfig(cfg)),
-					http.Flags(flagset.ServerWithConfig(cfg)),
+					http.Flags(flagset.RootWithConfig(config.New())),
+					http.Flags(flagset.ServerWithConfig(config.New())),
 				)
 
 				gr.Add(func() error {
@@ -154,45 +153,6 @@ func Server(cfg *config.Config) *cli.Command {
 					cancel()
 				})
 			}
-
-			{
-				server, err := debug.Server(
-					debug.Logger(logger),
-					debug.Name("markdown-editor"),
-					debug.Context(ctx),
-					debug.Config(cfg),
-				)
-
-				if err != nil {
-					logger.Info().
-						Err(err).
-						Str("transport", "debug").
-						Msg("Failed to initialize server")
-
-					return err
-				}
-
-				gr.Add(func() error {
-					return server.ListenAndServe()
-				}, func(_ error) {
-					ctx, timeout := context.WithTimeout(ctx, 5*time.Second)
-
-					defer timeout()
-					defer cancel()
-
-					if err := server.Shutdown(ctx); err != nil {
-						logger.Info().
-							Err(err).
-							Str("transport", "debug").
-							Msg("Failed to shutdown server")
-					} else {
-						logger.Info().
-							Str("transport", "debug").
-							Msg("Shutting down server")
-					}
-				})
-			}
-
 			{
 				stop := make(chan os.Signal, 1)
 
