@@ -35,7 +35,7 @@ func Execute() error {
 			logger := NewLogger(cfg)
 
 			viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-			viper.SetEnvPrefix("MARKDOWN-EDITOR")
+			viper.SetEnvPrefix("MARKDOWN_EDITOR")
 			viper.AutomaticEnv()
 
 			if c.IsSet("config-file") {

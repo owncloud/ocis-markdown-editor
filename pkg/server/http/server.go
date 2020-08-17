@@ -1,6 +1,8 @@
 package http
 
 import (
+	"github.com/go-chi/chi"
+	"github.com/owncloud/ocis-markdown-editor/pkg/assets"
 	svc "github.com/owncloud/ocis-markdown-editor/pkg/service/v0"
 	"github.com/owncloud/ocis-markdown-editor/pkg/version"
 	"github.com/owncloud/ocis-pkg/v2/middleware"
@@ -13,42 +15,50 @@ func Server(opts ...Option) (http.Service, error) {
 
 	service := http.NewService(
 		http.Logger(options.Logger),
+		http.Namespace(options.Namespace),
 		http.Name("markdown-editor"),
 		http.Version(version.String),
-		http.Namespace(options.Config.HTTP.Namespace),
 		http.Address(options.Config.HTTP.Addr),
 		http.Context(options.Context),
 		http.Flags(options.Flags...),
 	)
 
-	handle := svc.NewService(
-		svc.Logger(options.Logger),
-		svc.Config(options.Config),
-		svc.Middleware(
-			middleware.RealIP,
-			middleware.RequestID,
-			middleware.Cache,
-			middleware.Cors,
-			middleware.Secure,
-			middleware.Version(
-				"markdown-editor",
-				version.String,
-			),
-			middleware.Logger(
-				options.Logger,
-			),
-		),
-	)
+	markdownEditor := svc.NewService()
 
 	{
-		handle = svc.NewInstrument(handle, options.Metrics)
-		handle = svc.NewLogging(handle, options.Logger)
-		handle = svc.NewTracing(handle)
+		markdownEditor = svc.NewInstrument(markdownEditor, options.Metrics)
+		markdownEditor = svc.NewLogging(markdownEditor, options.Logger)
+		markdownEditor = svc.NewTracing(markdownEditor)
 	}
+
+	mux := chi.NewMux()
+
+	mux.Use(middleware.RealIP)
+	mux.Use(middleware.RequestID)
+	mux.Use(middleware.Cache)
+	mux.Use(middleware.Cors)
+	mux.Use(middleware.Secure)
+
+	mux.Use(middleware.Version(
+		"markdown-editor",
+		version.String,
+	))
+
+	mux.Use(middleware.Logger(
+		options.Logger,
+	))
+
+	mux.Use(middleware.Static(
+		options.Config.HTTP.Root,
+		assets.New(
+			assets.Logger(options.Logger),
+			assets.Config(options.Config),
+		),
+	))
 
 	service.Handle(
 		"/",
-		handle,
+		mux,
 	)
 
 	service.Init()
